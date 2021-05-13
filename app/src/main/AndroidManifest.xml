@@ -9,8 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".LoginActivity"></activity>
         <activity
-            android:name=".MainActivity1"
+            android:name=".MainActivity"
             android:label="@string/title_activity_main1"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -18,9 +19,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity">
-
         </activity>
     </application>
 

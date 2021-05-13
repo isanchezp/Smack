@@ -46,23 +46,28 @@
 
     <Button
         android:id="@+id/btn_login"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="32dp"
-        android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
+        android:onClick="onLoginClicked"
         android:text="Login"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/iv_avatar"
+        app:layout_constraintStart_toStartOf="@id/iv_avatar" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_add_channel"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/addchannelbutton"
+        android:background="@android:color/transparent"
+        android:onClick="onAddChannelClicked"
+        android:scaleType="centerCrop"
+        android:src="@drawable/addchannelbutton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
