@@ -1,5 +1,6 @@
 package com.ivan.smack
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -13,5 +14,7 @@ class LoginActivity : AppCompatActivity() {
 
     fun onLoginClicked(view: View) {}
 
-    fun onSignupClicked(view: View) {}
+    fun onSignupClicked(view: View) {
+        startActivity(Intent(this, UserActivity::class.java))
+    }
 }
