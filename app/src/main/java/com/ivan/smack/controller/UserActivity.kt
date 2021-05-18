@@ -1,9 +1,11 @@
-package com.ivan.smack
+package com.ivan.smack.controller
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.ivan.smack.R
+import com.ivan.smack.services.AuthService
 import kotlinx.android.synthetic.main.activity_user.*
 import java.util.*
 
@@ -47,5 +49,11 @@ class UserActivity : AppCompatActivity() {
         println(avatarColor)
     }
 
-    fun onCreateUserClicked(view: View) {}
+    fun onCreateUserClicked(view: View) {
+        AuthService.registerUser(this, "j@j.com", "123456"){
+            if (it) {
+
+            }
+        }
+    }
 }
