@@ -51,13 +51,18 @@ class UserActivity : AppCompatActivity() {
     }
 
     fun onCreateUserClicked(view: View) {
+        val userName = et_user_name.text.toString()
         val email = et_email.text.toString()
         val pws = et_key.text.toString()
         AuthService.registerUser(this, email, pws){ registerSuccess ->
             if (registerSuccess) {
                 AuthService.login(this, email, pws){ loginSuccess ->
                     if (loginSuccess) {
-
+                        AuthService.createUser(this, userName, email, userAvatar, avatarColor){ createSuccess ->
+                            if (createSuccess) {
+                                finish()
+                            }
+                        }
                     }
                 }
             }
