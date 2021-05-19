@@ -1,17 +1,14 @@
 package com.ivan.smack.controller
 
-import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.view.inputmethod.InputMethodManager.HIDE_IMPLICIT_ONLY
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.ivan.smack.R
 import com.ivan.smack.services.AuthService
+import com.ivan.smack.utils.hideKeyboard
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_user.*
 
 class LoginActivity : AppCompatActivity() {
 
@@ -62,12 +59,5 @@ class LoginActivity : AppCompatActivity() {
     private fun errorToast() {
         Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_LONG).show()
         enableSpinner(false)
-    }
-
-    private fun hideKeyboard() {
-        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (inputManager.isAcceptingText) {
-            inputManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-        }
     }
 }

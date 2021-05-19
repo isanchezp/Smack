@@ -7,6 +7,8 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -14,6 +16,7 @@ import com.ivan.smack.R
 import com.ivan.smack.services.AuthService
 import com.ivan.smack.services.UserDataService
 import com.ivan.smack.utils.BROADCAST_USER_DATA_CHANGE
+import com.ivan.smack.utils.hideKeyboard
 import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.android.synthetic.main.nav_header_main.btn_login
 
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+        hideKeyboard()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             userDataChangeReceiver, IntentFilter(
                 BROADCAST_USER_DATA_CHANGE
@@ -59,7 +63,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onAddChannelClicked(view: View) {}
+    fun onAddChannelClicked(view: View) {
+        if (AuthService.isLoggedIn) {
+            val builder = AlertDialog.Builder(this)
+            val view = layoutInflater.inflate(R.layout.add_channel_dialog, null)
+            builder.setView(view)
+                .setPositiveButton("Add"){ dialogInterface, i ->
+                    val nameEt = view.findViewById<EditText>(R.id.et_add_channel_name)
+                    val descriptionEt = view.findViewById<EditText>(R.id.et_channel_description)
+                    val name = nameEt.text.toString()
+                    val description = descriptionEt.text.toString()
+
+                    hideKeyboard()
+                }
+                .setNegativeButton("Cancel"){ dialogInterface, i ->
+                    hideKeyboard()
+                }
+                .show()
+        }
+    }
 
     fun onSendClicked(view: View) {}
 }
