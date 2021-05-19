@@ -97,14 +97,14 @@ class UserActivity : AppCompatActivity() {
         }
     }
 
-    fun enableSpinner(enable: Boolean) {
+    private fun enableSpinner(enable: Boolean) {
         pb_loader.visibility = if (enable) View.VISIBLE else View.INVISIBLE
         btn_create_user.isEnabled = !enable
         iv_avatar.isEnabled = !enable
         btn_color.isEnabled = !enable
     }
 
-    fun errorToast() {
+    private fun errorToast() {
         Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_LONG).show()
         enableSpinner(false)
     }

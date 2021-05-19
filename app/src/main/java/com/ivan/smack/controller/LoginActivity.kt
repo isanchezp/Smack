@@ -17,5 +17,6 @@ class LoginActivity : AppCompatActivity() {
 
     fun onSignupClicked(view: View) {
         startActivity(Intent(this, UserActivity::class.java))
+        finish()
     }
 }
