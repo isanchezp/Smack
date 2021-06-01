@@ -7,23 +7,45 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ivan.smack.R
+import com.ivan.smack.model.Channel
 import com.ivan.smack.services.AuthService
+import com.ivan.smack.services.MessageService
 import com.ivan.smack.services.UserDataService
 import com.ivan.smack.utils.BROADCAST_USER_DATA_CHANGE
+import com.ivan.smack.utils.SOCKET_URL
 import com.ivan.smack.utils.hideKeyboard
+import io.socket.client.IO
+import io.socket.emitter.Emitter
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.android.synthetic.main.nav_header_main.btn_login
+import java.util.zip.ZipEntry
 
 class MainActivity : AppCompatActivity() {
 
+    private val socket = IO.socket(SOCKET_URL)
+    private lateinit var channelAdapter: ArrayAdapter<Channel>
+
+    private val onNewChannel = Emitter.Listener {
+        runOnUiThread {
+            val channelName = it[0] as String
+            val channelDescription = it[1] as String
+            val channelId = it[2] as String
+            val newChannel = Channel(channelName, channelDescription, channelId)
+            MessageService.channels.add(newChannel)
+            channelAdapter.notifyDataSetChanged()
+        }
+    }
+
     private val userDataChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context, intent: Intent?) {
             if (AuthService.isLoggedIn) {
                 tv_name.text = UserDataService.name
                 tv_mail.text = UserDataService.email
@@ -32,6 +54,12 @@ class MainActivity : AppCompatActivity() {
                 iv_avatar.setImageResource(resourceId)
                 iv_avatar.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 btn_login.text = "Logout"
+
+                MessageService.getChannels(context) { success ->
+                    if (success) {
+                        channelAdapter.notifyDataSetChanged()
+                    }
+                }
             }
         }
     }
@@ -41,12 +69,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        hideKeyboard()
+        setupAdapters()
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
+    }
+
+    override fun onResume() {
+        super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             userDataChangeReceiver, IntentFilter(
                 BROADCAST_USER_DATA_CHANGE
             )
         )
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onDestroy()
     }
 
     fun onLoginClicked(view: View) {
@@ -68,20 +108,27 @@ class MainActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this)
             val view = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(view)
-                .setPositiveButton("Add"){ dialogInterface, i ->
+                .setPositiveButton("Add") { dialogInterface, i ->
                     val nameEt = view.findViewById<EditText>(R.id.et_add_channel_name)
                     val descriptionEt = view.findViewById<EditText>(R.id.et_channel_description)
                     val name = nameEt.text.toString()
                     val description = descriptionEt.text.toString()
 
-                    hideKeyboard()
+                    socket.emit("newChannel", name, description)
                 }
-                .setNegativeButton("Cancel"){ dialogInterface, i ->
-                    hideKeyboard()
+                .setNegativeButton("Cancel") { dialogInterface, i ->
                 }
                 .show()
         }
     }
 
-    fun onSendClicked(view: View) {}
+    fun onSendClicked(view: View) {
+        hideKeyboard()
+    }
+
+    private fun setupAdapters() {
+        channelAdapter =
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
+        channel_list.adapter = channelAdapter
+    }
 }

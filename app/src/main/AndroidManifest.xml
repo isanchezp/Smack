@@ -16,7 +16,8 @@
         <activity
             android:name=".controller.MainActivity"
             android:label="@string/title_activity_main1"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
