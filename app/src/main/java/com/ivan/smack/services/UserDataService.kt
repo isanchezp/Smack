@@ -1,6 +1,7 @@
 package com.ivan.smack.services
 
 import android.graphics.Color
+import com.ivan.smack.controller.App
 
 object UserDataService {
 
@@ -34,8 +35,8 @@ object UserDataService {
         avatarName = ""
         email = ""
         name = ""
-        AuthService.authToken = ""
-        AuthService.userMail = ""
-        AuthService.isLoggedIn = false
+        App.sharedPreferences.authToken = ""
+        App.sharedPreferences.userEmail = ""
+        App.sharedPreferences.isLoggedIn = false
     }
 }
