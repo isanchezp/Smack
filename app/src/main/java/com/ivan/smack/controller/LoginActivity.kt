@@ -25,7 +25,7 @@ class LoginActivity : AppCompatActivity() {
         val pws = et_password.text.toString()
 
         if (email.isNotEmpty() && pws.isNotEmpty()) {
-            AuthService.login(this, email, pws) { success ->
+            AuthService.login(email, pws) { success ->
                 if (success) {
                     AuthService.findUserByEmail(this) { success ->
                         if (success) {

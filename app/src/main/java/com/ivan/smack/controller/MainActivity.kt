@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -12,9 +13,11 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ivan.smack.R
 import com.ivan.smack.model.Channel
+import com.ivan.smack.model.Message
 import com.ivan.smack.services.AuthService
 import com.ivan.smack.services.MessageService
 import com.ivan.smack.services.UserDataService
@@ -24,6 +27,7 @@ import com.ivan.smack.utils.hideKeyboard
 import io.socket.client.IO
 import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.android.synthetic.main.nav_header_main.btn_login
 import java.util.zip.ZipEntry
@@ -32,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     private val socket = IO.socket(SOCKET_URL)
     private lateinit var channelAdapter: ArrayAdapter<Channel>
+    var selectedChannel: Channel? = null
 
     private val onNewChannel = Emitter.Listener {
         runOnUiThread {
@@ -41,6 +46,22 @@ class MainActivity : AppCompatActivity() {
             val newChannel = Channel(channelName, channelDescription, channelId)
             MessageService.channels.add(newChannel)
             channelAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private val onNewMessage = Emitter.Listener {
+        runOnUiThread {
+            val msgBody = it[0] as String
+            val channelId = it[2] as String
+            val userName = it[3] as String
+            val userAvatar = it[4] as String
+            val userAvatarColor = it[5] as String
+            val id = it[6] as String
+            val timeStamp = it[7] as String
+
+            val newMessage =
+                Message(msgBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
+            MessageService.messages.add(newMessage)
         }
     }
 
@@ -57,7 +78,11 @@ class MainActivity : AppCompatActivity() {
 
                 MessageService.getChannels(context) { success ->
                     if (success) {
-                        channelAdapter.notifyDataSetChanged()
+                        if (MessageService.channels.count() > 0) {
+                            selectedChannel = MessageService.channels[0]
+                            channelAdapter.notifyDataSetChanged()
+                            updateWithChannel()
+                        }
                     }
                 }
             }
@@ -72,13 +97,16 @@ class MainActivity : AppCompatActivity() {
         setupAdapters()
         socket.connect()
         socket.on("channelCreated", onNewChannel)
+        socket.on("messageCreated", onNewMessage)
+
+        channel_list.setOnItemClickListener { parent, view, position, id ->
+            selectedChannel = MessageService.channels[position]
+            drawer_layout.closeDrawer(GravityCompat.START)
+            updateWithChannel()
+        }
 
         if (App.sharedPreferences.isLoggedIn) {
-            AuthService.findUserByEmail(this){ success ->
-                if (success) {
-
-                }
-            }
+            AuthService.findUserByEmail(this) {}
         }
     }
 
@@ -131,12 +159,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onSendClicked(view: View) {
-        hideKeyboard()
+        if (App.sharedPreferences.isLoggedIn
+            && et_message.text.isNotEmpty()
+            && selectedChannel != null
+        ) {
+            val userId = UserDataService.id
+            val channelId = selectedChannel!!.id
+            socket.emit(
+                "newMessage", et_message.text.toString(), userId, channelId,
+                UserDataService.name, UserDataService.avatarName, UserDataService.avatarColor
+            )
+            et_message.text.clear()
+            hideKeyboard()
+        }
     }
 
     private fun setupAdapters() {
         channelAdapter =
             ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
+    }
+
+    private fun updateWithChannel() {
+        tv_title.text = "#${selectedChannel?.name}"
+        // download messages for channel
     }
 }

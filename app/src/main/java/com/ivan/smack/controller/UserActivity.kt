@@ -63,12 +63,11 @@ class UserActivity : AppCompatActivity() {
         val pws = et_key.text.toString()
 
         if (userName.isNotEmpty() && email.isNotEmpty() && pws.isNotEmpty()) {
-            AuthService.registerUser(this, email, pws) { registerSuccess ->
+            AuthService.registerUser(email, pws) { registerSuccess ->
                 if (registerSuccess) {
-                    AuthService.login(this, email, pws) { loginSuccess ->
+                    AuthService.login(email, pws) { loginSuccess ->
                         if (loginSuccess) {
                             AuthService.createUser(
-                                this,
                                 userName,
                                 email,
                                 userAvatar,
