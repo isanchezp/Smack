@@ -1,5 +1,6 @@
 package com.ivan.smack.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,9 @@ import com.ivan.smack.adapters.MessageAdapter.MessageViewHolder
 import com.ivan.smack.model.Message
 import com.ivan.smack.services.UserDataService
 import kotlinx.android.synthetic.main.item_message.view.*
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MessageAdapter(val messages: MutableList<Message>): RecyclerView.Adapter<MessageViewHolder>() {
 
@@ -35,8 +39,26 @@ class MessageAdapter(val messages: MutableList<Message>): RecyclerView.Adapter<M
             image.setImageResource(resourceId)
             image.setBackgroundColor(UserDataService.returnAvatarColor(msg.userAvatarColor))
             user.text = msg.userName
-            timestamp.text = msg.timestamp
+            timestamp.text = returnDateString(msg.timestamp)
             message.text = msg.message
+        }
+
+        /**
+         * date received 2017-09-11T01:16:13.858Z
+         * date returned Monday 4:35 PM
+         */
+        private fun returnDateString(isoString: String): String{
+            val isoFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoFormatter.timeZone = TimeZone.getTimeZone("UTC")
+            var convertedDate = Date()
+            try {
+                convertedDate = isoFormatter.parse(isoString)
+            } catch (e: ParseException) {
+                Log.d("PARSE", "Can not parse date")
+            }
+
+            val outDateFormat = SimpleDateFormat("E, h:mm a", Locale.getDefault())
+            return outDateFormat.format(convertedDate)
         }
     }
 }
