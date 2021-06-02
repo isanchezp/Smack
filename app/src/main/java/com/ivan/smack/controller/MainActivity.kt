@@ -111,6 +111,12 @@ class MainActivity : AppCompatActivity() {
         socket.on("channelCreated", onNewChannel)
         socket.on("messageCreated", onNewMessage)
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            userDataChangeReceiver, IntentFilter(
+                BROADCAST_USER_DATA_CHANGE
+            )
+        )
+
         channel_list.setOnItemClickListener { parent, view, position, id ->
             selectedChannel = MessageService.channels[position]
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -120,15 +126,6 @@ class MainActivity : AppCompatActivity() {
         if (App.sharedPreferences.isLoggedIn) {
             AuthService.findUserByEmail(this) {}
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            userDataChangeReceiver, IntentFilter(
-                BROADCAST_USER_DATA_CHANGE
-            )
-        )
     }
 
     override fun onDestroy() {
@@ -148,6 +145,7 @@ class MainActivity : AppCompatActivity() {
             iv_avatar.setImageResource(R.drawable.profiledefault)
             iv_avatar.setBackgroundColor(Color.TRANSPARENT)
             btn_login.text = "Login"
+            tv_title.text = "Please log in"
         } else {
             startActivity(Intent(this, LoginActivity::class.java))
         }
