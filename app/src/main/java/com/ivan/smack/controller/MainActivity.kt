@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ivan.smack.R
+import com.ivan.smack.adapters.MessageAdapter
 import com.ivan.smack.model.Channel
 import com.ivan.smack.model.Message
 import com.ivan.smack.services.AuthService
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     private val socket = IO.socket(SOCKET_URL)
     private lateinit var channelAdapter: ArrayAdapter<Channel>
+    private lateinit var messageAdapter: MessageAdapter
     var selectedChannel: Channel? = null
 
     private val onNewChannel = Emitter.Listener {
@@ -67,6 +69,9 @@ class MainActivity : AppCompatActivity() {
                     val newMessage =
                         Message(msgBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
                     MessageService.messages.add(newMessage)
+
+                    messageAdapter.notifyDataSetChanged()
+                    rv_chat.smoothScrollToPosition(messageAdapter.itemCount -1)
                 }
             }
         }
@@ -136,6 +141,8 @@ class MainActivity : AppCompatActivity() {
         if (App.sharedPreferences.isLoggedIn) {
             // logout
             UserDataService.logout()
+            channelAdapter.notifyDataSetChanged()
+            messageAdapter.notifyDataSetChanged()
             tv_name.text = ""
             tv_mail.text = ""
             iv_avatar.setImageResource(R.drawable.profiledefault)
@@ -185,6 +192,9 @@ class MainActivity : AppCompatActivity() {
         channelAdapter =
             ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
+
+        messageAdapter = MessageAdapter(MessageService.messages)
+        rv_chat.adapter = messageAdapter
     }
 
     private fun updateWithChannel() {
@@ -193,8 +203,9 @@ class MainActivity : AppCompatActivity() {
         if (selectedChannel != null) {
             MessageService.getMessages(selectedChannel!!.id){ success ->
                 if (success) {
-                    for (message in MessageService.messages) {
-
+                    messageAdapter.notifyDataSetChanged()
+                    if (messageAdapter.itemCount > 0) {
+                        rv_chat.smoothScrollToPosition(messageAdapter.itemCount -1)
                     }
                 }
             }
